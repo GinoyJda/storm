@@ -1,10 +1,10 @@
 package storm.topology;
-import com.storm.bolt.BoltA;
-import com.storm.bolt.KafkaMsgBolt;
-import com.storm.es.NewEsConfig;
-import com.storm.es.NewEsIndexBolt;
-import com.storm.redis.RedisBolt;
-import com.storm.spout.SpoutA;
+import storm.bolt.BoltA;
+import storm.bolt.KafkaMsgBolt;
+import storm.es.NewEsConfig;
+import storm.es.NewEsIndexBolt;
+import storm.redis.RedisBolt;
+import storm.spout.SpoutA;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;

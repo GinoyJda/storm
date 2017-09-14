@@ -1,8 +1,8 @@
 package storm.topology;
 
-import com.storm.spout.FixedBatchSpout;
-import com.storm.trident.Split;
-import com.storm.trident.WordAggregat;
+import storm.spout.FixedBatchSpout;
+import storm.trident.Split;
+import storm.trident.WordAggregat;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.StormTopology;
