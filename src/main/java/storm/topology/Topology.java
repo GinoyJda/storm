@@ -1,4 +1,13 @@
 package storm.topology;
+import org.apache.storm.hdfs.bolt.HdfsBolt;
+import org.apache.storm.hdfs.bolt.format.DefaultFileNameFormat;
+import org.apache.storm.hdfs.bolt.format.DelimitedRecordFormat;
+import org.apache.storm.hdfs.bolt.format.FileNameFormat;
+import org.apache.storm.hdfs.bolt.format.RecordFormat;
+import org.apache.storm.hdfs.bolt.rotation.FileRotationPolicy;
+import org.apache.storm.hdfs.bolt.rotation.FileSizeRotationPolicy;
+import org.apache.storm.hdfs.bolt.sync.CountSyncPolicy;
+import org.apache.storm.hdfs.bolt.sync.SyncPolicy;
 import storm.bolt.BoltA;
 import storm.bolt.KafkaMsgBolt;
 import storm.es.NewEsConfig;
@@ -33,7 +42,7 @@ import java.util.Properties;
  * To change this template use File | Settings | File Templates.
  */
 public class Topology {
-    public static boolean  kafka = true;
+    public static boolean  kafka = false;
     public static boolean  redis = false;
 
     public static void main(String args[]) throws AuthorizationException, AlreadyAliveException, InvalidTopologyException {
@@ -43,7 +52,7 @@ public class Topology {
             //KafkaSpout
             builtKafkaSpout(builder);
             builder.setBolt("BoltA",new BoltA(),1).shuffleGrouping("kafka-spout");
-            builtEsIndexBolt(builder);
+//            builtEsIndexBolt(builder);
         }else if(redis){
             //KafkaSpout
             builtKafkaSpout(builder);
@@ -52,9 +61,10 @@ public class Topology {
         }else{
             //普通Spout
             builder.setSpout("SpoutA",new SpoutA(),1);
-            builder.setBolt("BoltA",new BoltA(),1).shuffleGrouping("SpoutA");
+//            builder.setBolt("BoltA",new BoltA(),1).shuffleGrouping("SpoutA");
+            builder.setBolt("Hdfs", HdfsConfig()).shuffleGrouping("SpoutA");
             //构建KafkaBolt
-            builtKafkaBolt(builder);
+//            builtKafkaBolt(builder);
         }
 
 
@@ -68,7 +78,7 @@ public class Topology {
         }
         else {
             LocalCluster cluster = new LocalCluster();
-            cluster.submitTopology("soc", conf, builder.createTopology());
+            cluster.submitTopology("test", conf, builder.createTopology());
 //            Utils.sleep(20000);
 //            cluster.killTopology("soc");
 //            cluster.shutdown();
@@ -89,8 +99,8 @@ public class Topology {
     private static void builtKafkaBolt(TopologyBuilder builder){
         //kafka producer config
         Properties prop = new Properties();
-        prop.put("metadata.broker.list", "10.2.4.13:9092,10.2.4.14:9092,10.2.4.12:9092");
-        prop.put("bootstrap.servers", "10.2.4.13:9092,10.2.4.14:9092,10.2.4.12:9092");
+        prop.put("metadata.broker.list", "10.240.1.233:9092");
+        prop.put("bootstrap.servers", "10.240.1.233:9092");
         prop.put("producer.type","async");
         prop.put("request.required.acks","1");
         prop.put("serializer.class", "kafka.serializer.StringEncoder");
@@ -98,7 +108,7 @@ public class Topology {
         prop.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
         //kafkaBolt
         KafkaBolt bolt = new KafkaBolt();
-        bolt.withTopicSelector(new DefaultTopicSelector("test_rce_yjd"));
+        bolt.withTopicSelector(new DefaultTopicSelector("test"));
         bolt.withProducerProperties(prop);
         bolt.withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper());
         //构建KafkaBolt
@@ -113,13 +123,13 @@ public class Topology {
      */
     private static void builtKafkaSpout(TopologyBuilder builder) {
         try {
-            BrokerHosts brokerHosts = new ZkHosts("10.2.4.12:2181,10.2.4.13:2181,10.2.4.14:2181");
-            SpoutConfig spoutConf = new SpoutConfig(brokerHosts, "test_rce_yjd", "/storm/data/2016122615", "logFramework");
+            BrokerHosts brokerHosts = new ZkHosts("10.240.1.233:2181");
+            SpoutConfig spoutConf = new SpoutConfig(brokerHosts, "test", "/consumer/data", "group_yjd");
             spoutConf.scheme = new SchemeAsMultiScheme(new StringScheme());
             spoutConf.zkPort = 2181;
             spoutConf.ignoreZkOffsets = false; // 每次消费都从头开始，用于性能测试
             List<String> servers = new ArrayList<String>();
-            String ZK_SERVERS = "10.2.4.12,10.2.4.13,10.2.4.14";
+            String ZK_SERVERS = "10.240.1.233";
             if (ZK_SERVERS != null) {
                 String[] arr = ZK_SERVERS.split(",");
                 for (int i = 0; i < arr.length; i++) {
@@ -152,6 +162,31 @@ public class Topology {
         JedisPoolConfig poolConfig = new JedisPoolConfig.Builder().setHost("10.2.4.12").setPort(6379).build();
         RedisBolt rb = new  RedisBolt(poolConfig);
         builder.setBolt("redis-bolt",rb,1).shuffleGrouping("BoltA");
+    }
+
+
+    private static HdfsBolt HdfsConfig(){
+        // 输出字段分隔符
+        RecordFormat format = new DelimitedRecordFormat().withFieldDelimiter("|");
+
+        // 每1000个tuple同步到HDFS一次
+        SyncPolicy syncPolicy = new CountSyncPolicy(1000);
+
+        // 每个写出文件的大小为100MB
+        FileRotationPolicy rotationPolicy = new FileSizeRotationPolicy(100.0f, FileSizeRotationPolicy.Units.MB);
+
+        // 设置输出目录
+        FileNameFormat fileNameFormat = new DefaultFileNameFormat().withPath("/soc/hadoop/tmp/dfs/data");
+
+        // 执行HDFS地址
+        HdfsBolt hdfsBolt = new HdfsBolt()
+                .withFsUrl("hdfs://10.176.63.105:9000")
+                .withFileNameFormat(fileNameFormat)
+                .withRecordFormat(format)
+                .withRotationPolicy(rotationPolicy)
+                .withSyncPolicy(syncPolicy);
+        return  hdfsBolt;
+
     }
 
 }
