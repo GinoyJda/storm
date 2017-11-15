@@ -15,6 +15,7 @@ import org.apache.storm.kafka.trident.TridentKafkaConfig;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.trident.TridentTopology;
 import org.apache.storm.tuple.Fields;
+import storm.trident.OutPrint;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,14 +28,14 @@ public class TridentKafkaTopology {
 
     public static void main(String[] args) throws AlreadyAliveException,InvalidTopologyException, AuthorizationException {
         TridentTopology topology = new TridentTopology();
-        BrokerHosts brokerHosts = new ZkHosts("10.2.4.12:2181,10.2.4.13:2181,10.2.4.14:2181");
-        TridentKafkaConfig kafkaConfig = new TridentKafkaConfig(brokerHosts, "test_rce_yjd");
+        BrokerHosts brokerHosts = new ZkHosts("10.240.1.233:2181");
+        TridentKafkaConfig kafkaConfig = new TridentKafkaConfig(brokerHosts, "test","ginoy");
         kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         OpaqueTridentKafkaSpout opaqueTridentKafkaSpout = new OpaqueTridentKafkaSpout(kafkaConfig);
         topology.newStream("kafka-trident", opaqueTridentKafkaSpout)
                 .parallelismHint(3)
-                .aggregate(new Fields("str"),new LogAggr(),new Fields("sysout"));
-//                .each(new Fields("str"), new OutPrint(), new Fields("sysout"));
+//                .aggregate(new Fields("str"),new LogAggr(),new Fields("sysout"));
+                .each(new Fields("str"), new OutPrint(), new Fields("sysout"));
 //                .each(new Fields("str"), new SpilterFunction(), new Fields("sentence"))
 //                .groupBy(new Fields("sentence"))
 //                .aggregate(new Fields("sentence"), new SumWord(),new Fields("sum")).parallelismHint(5)

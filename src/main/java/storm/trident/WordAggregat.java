@@ -40,8 +40,9 @@ public  class WordAggregat extends BaseAggregator<Map<String, Integer>> {
     @Override
     public void complete(Map<String, Integer> val, TridentCollector collector) {
         for (String key : map.keySet()) {
-            System.out.println("key= "+ key + " and value= " + map.get(key));
+//            System.out.println("key= "+ key + " and value= " + map.get(key));
+            collector.emit(new Values(String.valueOf(map.get(key))));
         }
-        collector.emit(new Values(map));
+
     }
 }

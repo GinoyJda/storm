@@ -12,7 +12,7 @@ public class QueryLocation extends BaseQueryFunction<LocationDB, String> {
     public List<String> batchRetrieve(LocationDB state, List<TridentTuple> inputs) {
         List<String> ret = new ArrayList();
         for(TridentTuple input: inputs) {
-            ret.add(state.getLocation(input.getLong(0)));
+            ret.add(state.getLocation(input.getString(0)));
         }
         return ret;
     }

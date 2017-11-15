@@ -13,7 +13,7 @@ public class LocationDB implements State {
         // code to access database and set location
     }
 
-    public String getLocation(long userId) {
+    public String getLocation(String userId) {
         // code to get location from database
         return "localhost";
     }

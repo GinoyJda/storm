@@ -3,10 +3,12 @@ package storm.topology;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.StormTopology;
+import org.apache.storm.trident.Stream;
 import org.apache.storm.trident.TridentTopology;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 import storm.spout.FixedBatchSpout;
+import storm.trident.OutPrint;
 import storm.trident.Split;
 import storm.trident.WordAggregat;
 
@@ -27,10 +29,15 @@ public class TridentAggreTopology {
                 new Values("jumped"));
 //        spout.setCycle(true);
 
-        topology.newStream("batch-spout",spout)
+        Stream one = topology.newStream("batch-spout-one",spout).parallelismHint(3)
                 .each(new Fields("sentence"), new Split(), new Fields("word"))    //分割
                 .partitionBy(new Fields("word"))
                 .partitionAggregate(new Fields("word"), new WordAggregat(), new Fields("agg"));
+
+        Stream two = topology.newStream("batch-spout-two",spout)
+                .each(new Fields("sentence"), new Split(), new Fields("word-one"));
+
+        topology.merge(new Fields("out-print"),two).each(new Fields("out-print"), new OutPrint(), new Fields("word"));
 
 
         StormTopology stormTopology = topology.build();

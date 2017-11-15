@@ -13,6 +13,7 @@ public class ReadHdfs {
 
     public static void main(String args[]) throws Exception {
         ReadFile();
+//        ReadUrl();
     }
 
     public static void ReadFile() throws Exception {
@@ -32,7 +33,7 @@ public class ReadHdfs {
 
 
     public static void ReadUrl() throws Exception {
-        String uri = "/soc/hadoop/tmp/dfs/data";
+        String uri = "hdfs://10.176.63.105:9000/soc/hadoop/tmp/dfs/data";
         InputStream in = null;
         try {
             in = new URL(uri).openStream();

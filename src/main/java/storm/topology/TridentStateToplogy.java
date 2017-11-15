@@ -1,5 +1,8 @@
 package storm.topology;
 
+import org.apache.storm.Config;
+import org.apache.storm.LocalCluster;
+import org.apache.storm.generated.StormTopology;
 import org.apache.storm.trident.TridentState;
 import org.apache.storm.trident.TridentTopology;
 import org.apache.storm.tuple.Fields;
@@ -33,6 +36,11 @@ public class TridentStateToplogy {
                 .stateQuery(locations, new Fields("sentence"), new QueryLocation(), new Fields("location"))
                 .each(new Fields("location"), new OutPrint(),new Fields("sysout"));
 
+        StormTopology stormTopology = topology.build();
+        LocalCluster cluster = new LocalCluster();
+        Config config = new Config();
+        config.setDebug(false);
+        cluster.submitTopology("test", config,stormTopology);
     }
 
 }
