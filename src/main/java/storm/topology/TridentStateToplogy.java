@@ -7,11 +7,13 @@ import org.apache.storm.trident.TridentState;
 import org.apache.storm.trident.TridentTopology;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
+import storm.aggr.CombinerCount;
 import storm.spout.FixedBatchSpout;
 import storm.state.LocationDBFactory;
 import storm.state.QueryLocation;
 import storm.trident.OutPrint;
 import storm.trident.Split;
+import storm.util.OutPrintUtil;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,9 +34,13 @@ public class TridentStateToplogy {
 
         TridentState locations = topology.newStaticState(new LocationDBFactory());
 
-        topology.newStream("sentence", spout)
-                .stateQuery(locations, new Fields("sentence"), new QueryLocation(), new Fields("location"))
-                .each(new Fields("location"), new OutPrint(),new Fields("sysout"));
+        topology.newStream("sentence", spout).each(new Fields("sentence"),new OutPrint(),new Fields("a")) //a int b str
+        .groupBy(new Fields("a")).each(new Fields("a"),new OutPrintUtil(),new Fields(""));
+//                .groupBy(new Fields("sentence"))
+//                .stateQuery(locations, new Fields("sentence"), new QueryLocation(), new Fields("location", "ids"))
+//                .groupBy(new Fields("ids"));
+//                .partitionAggregate(new Fields("ids"),new CombinerCount(),new Fields("ids"));
+//                .each(new Fields("location"), new OutPrint(),new Fields("sysout")).partitionBy(new Fields("sysout"));
 
         StormTopology stormTopology = topology.build();
         LocalCluster cluster = new LocalCluster();
