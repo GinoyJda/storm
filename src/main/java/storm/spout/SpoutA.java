@@ -20,7 +20,7 @@ public class SpoutA extends BaseRichSpout {
         private SpoutOutputCollector collector;
 
         public void nextTuple() {
-            String b = "{what the fuck}";
+            String b = "{test a hdfs values}";
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {

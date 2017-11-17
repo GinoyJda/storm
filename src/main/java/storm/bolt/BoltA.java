@@ -23,10 +23,13 @@ public class BoltA extends BaseRichBolt {
     @Override
     public void execute(Tuple arg0) {
         String word = (String) arg0.getValue(0);
+        System.out.println(word);
+
         String out = " ########source is######### '" + "{\"id\":1,\"ide\":\"eclipse\",\"name\":\"Java\"}" + "'!";
-        String uuid = Utils.getUUID();
-        System.out.println(out + "  out:"+out);
-        collector.emit(new Values("{\"id\":1,\"ide\":\"eclipse\",\"name\":\"Java\"}","test","test", uuid));
+//        String uuid = Utils.getUUID();
+//        System.out.println(out + "  out:"+out);
+//        collector.emit(new Values("{\"id\":1,\"ide\":\"eclipse\",\"name\":\"Java\"}","test","test", uuid));
+        collector.emit(new Values(out));
     }
 
     @Override
@@ -36,8 +39,9 @@ public class BoltA extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer arg0) {
+        arg0.declare(new Fields("out"));
 //        source, index, type, id
-        arg0.declare(new Fields("source", "index","type","id"));
+//        arg0.declare(new Fields("source", "index","type","id"));
 
     }
 }

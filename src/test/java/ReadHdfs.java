@@ -2,6 +2,10 @@ import java.io.InputStream;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.IOUtils;
@@ -12,7 +16,23 @@ public class ReadHdfs {
     }
 
     public static void main(String args[]) throws Exception {
-        ReadFile();
+//        List l = new ArrayList<String>();
+//        l.add("afdasf");
+//        l.add("badfa");
+//        for(int i=0;i<l.size();i++){
+//            System.out.println(l.get(i));
+//        }
+//
+//        Iterator it = l.iterator();
+//        while (it.hasNext()){
+//            System.out.println(it.next());
+//        }
+//
+//        while (it.hasNext()){
+//            System.out.println(it.next());
+//        }
+
+//        ReadFile();
 //        ReadUrl();
     }
 

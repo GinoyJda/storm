@@ -7,6 +7,7 @@ import org.apache.storm.trident.TridentState;
 import org.apache.storm.trident.TridentTopology;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
+import storm.aggr.AggrTest;
 import storm.aggr.CombinerCount;
 import storm.spout.FixedBatchSpout;
 import storm.state.LocationDBFactory;
@@ -25,17 +26,38 @@ import storm.util.OutPrintUtil;
 public class TridentStateToplogy {
     public static void main(String[] args){
         TridentTopology topology = new TridentTopology();
-        FixedBatchSpout spout = new FixedBatchSpout(new Fields("sentence"), 1,
-                new Values("the cow jumped over the moon"),
-                new Values("the man went to the store and bought some candy"),
-                new Values("four score and seven years ago"),
-                new Values("how many apples can you eat"));
-        spout.setCycle(true);
+        FixedBatchSpout spout = new FixedBatchSpout(new Fields("sentence"),10,
+                new Values("the"),
+                new Values("man"),
+                new Values("four"),
+                new Values("how"),
+
+                new Values("the"),
+                new Values("man"),
+                new Values("four"),
+                new Values("how"),
+
+                new Values("the"),
+                new Values("man"),
+                new Values("four"),
+                new Values("how"),
+
+                new Values("the"),
+                new Values("man"),
+                new Values("four"),
+                new Values("how")
+                );
+//        spout.setCycle(true);
 
         TridentState locations = topology.newStaticState(new LocationDBFactory());
+        topology.newStream("sentence", spout).each(new Fields("sentence"),new OutPrint(),new Fields("a","b")) //a int b str
+//        .shuffle()
+        .partitionBy(new Fields("a"))
+//        .groupBy(new Fields("a"))
+//        .aggregate(new Fields("a"), new AggrTest(), new Fields("b")).parallelismHint(3) ; //正常聚合 不分组
+        .partitionAggregate(new Fields("a","b"), new AggrTest(), new Fields("c")).parallelismHint(4);
 
-        topology.newStream("sentence", spout).each(new Fields("sentence"),new OutPrint(),new Fields("a")) //a int b str
-        .groupBy(new Fields("a")).each(new Fields("a"),new OutPrintUtil(),new Fields(""));
+//                .each(new Fields("a"),new OutPrintUtil(),new Fields(""));
 //                .groupBy(new Fields("sentence"))
 //                .stateQuery(locations, new Fields("sentence"), new QueryLocation(), new Fields("location", "ids"))
 //                .groupBy(new Fields("ids"));

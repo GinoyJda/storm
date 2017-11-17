@@ -19,8 +19,8 @@ public class OutPrintUtil extends BaseFunction {
     public void execute(TridentTuple objects, TridentCollector tridentCollector) {
 //        String str = objects.getString(0);
         tridentCollector.toString();
-        System.out.println("the str is:"+ objects.toString() );
-        tridentCollector.emit(new Values(getRandom()));
+//        System.out.println("the str is:"+ objects.toString() );
+//        tridentCollector.emit(new Values(getRandom()));
     }
 
     private int getRandom() {
